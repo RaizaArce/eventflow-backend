@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from extensions import db
 from models import AgendaItem
 from datetime import datetime
 
 agenda_bp = Blueprint('agenda', __name__)
 
-# Listar agenda de un evento, ordenada cronológicamente (RF-20)
 @agenda_bp.route('/eventos/<int:evento_id>/agenda', methods=['GET'])
+@jwt_required()
 def listar_agenda(evento_id):
     items = AgendaItem.query.filter_by(evento_id=evento_id).order_by(AgendaItem.hora_inicio).all()
     resultado = []
@@ -22,8 +23,8 @@ def listar_agenda(evento_id):
     return jsonify(resultado)
 
 
-# Crear actividad de agenda (RF-17)
 @agenda_bp.route('/eventos/<int:evento_id>/agenda', methods=['POST'])
+@jwt_required()
 def crear_actividad(evento_id):
     data = request.get_json()
     nueva_actividad = AgendaItem(
@@ -39,8 +40,8 @@ def crear_actividad(evento_id):
     return jsonify({"mensaje": "Actividad creada", "id": nueva_actividad.id}), 201
 
 
-# Editar actividad de agenda (RF-18)
 @agenda_bp.route('/agenda/<int:actividad_id>', methods=['PUT'])
+@jwt_required()
 def editar_actividad(actividad_id):
     item = AgendaItem.query.get_or_404(actividad_id)
     data = request.get_json()
@@ -55,8 +56,8 @@ def editar_actividad(actividad_id):
     return jsonify({"mensaje": "Actividad actualizada"})
 
 
-# Eliminar actividad de agenda (RF-19)
 @agenda_bp.route('/agenda/<int:actividad_id>', methods=['DELETE'])
+@jwt_required()
 def eliminar_actividad(actividad_id):
     item = AgendaItem.query.get_or_404(actividad_id)
     db.session.delete(item)

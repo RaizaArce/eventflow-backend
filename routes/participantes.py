@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from extensions import db
 from models import Participante
 import uuid
 
 participantes_bp = Blueprint('participantes', __name__)
 
-# Listar participantes de un evento (RF-12)
 @participantes_bp.route('/eventos/<int:evento_id>/participantes', methods=['GET'])
+@jwt_required()
 def listar_participantes(evento_id):
     participantes = Participante.query.filter_by(evento_id=evento_id).all()
     resultado = []
@@ -24,8 +25,8 @@ def listar_participantes(evento_id):
     return jsonify(resultado)
 
 
-# Registrar un participante (RF-09) - genera su QR automáticamente (RF-13)
 @participantes_bp.route('/eventos/<int:evento_id>/participantes', methods=['POST'])
+@jwt_required()
 def registrar_participante(evento_id):
     data = request.get_json()
     nuevo_participante = Participante(
@@ -45,8 +46,8 @@ def registrar_participante(evento_id):
     }), 201
 
 
-# Editar un participante (RF-10)
 @participantes_bp.route('/participantes/<int:participante_id>', methods=['PUT'])
+@jwt_required()
 def editar_participante(participante_id):
     p = Participante.query.get_or_404(participante_id)
     data = request.get_json()
@@ -58,8 +59,8 @@ def editar_participante(participante_id):
     return jsonify({"mensaje": "Participante actualizado"})
 
 
-# Eliminar un participante (RF-11)
 @participantes_bp.route('/participantes/<int:participante_id>', methods=['DELETE'])
+@jwt_required()
 def eliminar_participante(participante_id):
     p = Participante.query.get_or_404(participante_id)
     db.session.delete(p)

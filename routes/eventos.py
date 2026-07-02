@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from extensions import db
 from models import Evento
 from datetime import datetime
@@ -6,8 +7,8 @@ import uuid
 
 eventos_bp = Blueprint('eventos', __name__)
 
-# Listar todos los eventos (RF-07)
 @eventos_bp.route('/eventos', methods=['GET'])
+@jwt_required()
 def listar_eventos():
     eventos = Evento.query.all()
     resultado = []
@@ -27,8 +28,8 @@ def listar_eventos():
     return jsonify(resultado)
 
 
-# Crear un evento (RF-04)
 @eventos_bp.route('/eventos', methods=['POST'])
+@jwt_required()
 def crear_evento():
     data = request.get_json()
     nuevo_evento = Evento(
@@ -49,8 +50,8 @@ def crear_evento():
     return jsonify({"mensaje": "Evento creado", "id": nuevo_evento.id}), 201
 
 
-# Ver el detalle de un evento (RF-08)
 @eventos_bp.route('/eventos/<int:evento_id>', methods=['GET'])
+@jwt_required()
 def detalle_evento(evento_id):
     e = Evento.query.get_or_404(evento_id)
     return jsonify({
@@ -69,8 +70,8 @@ def detalle_evento(evento_id):
     })
 
 
-# Editar un evento (RF-05)
 @eventos_bp.route('/eventos/<int:evento_id>', methods=['PUT'])
+@jwt_required()
 def editar_evento(evento_id):
     e = Evento.query.get_or_404(evento_id)
     data = request.get_json()
@@ -87,8 +88,8 @@ def editar_evento(evento_id):
     return jsonify({"mensaje": "Evento actualizado"})
 
 
-# Eliminar un evento (RF-06)
 @eventos_bp.route('/eventos/<int:evento_id>', methods=['DELETE'])
+@jwt_required()
 def eliminar_evento(evento_id):
     e = Evento.query.get_or_404(evento_id)
     db.session.delete(e)

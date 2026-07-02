@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from extensions import db
 from models import Asistencia, Participante
 from datetime import datetime
 
 asistencias_bp = Blueprint('asistencias', __name__)
 
-# Escanear QR para registrar asistencia (RF-14)
 @asistencias_bp.route('/asistencias/escanear', methods=['POST'])
+@jwt_required()
 def escanear_qr():
     data = request.get_json()
     qr_code = data.get('qr_code')
@@ -37,8 +38,8 @@ def escanear_qr():
     })
 
 
-# Marcar asistencia manualmente (RF-15)
 @asistencias_bp.route('/asistencias/manual', methods=['POST'])
+@jwt_required()
 def marcar_manual():
     data = request.get_json()
     participante_id = data.get('participante_id')
@@ -57,8 +58,8 @@ def marcar_manual():
     return jsonify({"mensaje": "Asistencia marcada manualmente"})
 
 
-# Reporte de asistencia de un evento (RF-16)
 @asistencias_bp.route('/eventos/<int:evento_id>/reporte-asistencia', methods=['GET'])
+@jwt_required()
 def reporte_asistencia(evento_id):
     total_participantes = Participante.query.filter_by(evento_id=evento_id).count()
     confirmados = Asistencia.query.filter_by(evento_id=evento_id, estado='Confirmada').count()
