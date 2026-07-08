@@ -66,3 +66,46 @@ def eliminar_participante(participante_id):
     db.session.delete(p)
     db.session.commit()
     return jsonify({"mensaje": "Participante eliminado"})
+
+
+@participantes_bp.route('/eventos/<int:evento_id>/participantes/importar', methods=['POST'])
+@jwt_required()
+def importar_participantes(evento_id):
+    data = request.get_json()
+    participantes_data = data.get('participantes', [])
+    importados = 0
+    omitidos = 0
+    errores = []
+
+    for idx, p in enumerate(participantes_data):
+        nombre = p.get('nombre', '').strip()
+        dni = p.get('dni', '').strip()
+
+        if not nombre or not dni:
+            errores.append({"fila": idx + 1, "mensaje": "nombre y dni son obligatorios"})
+            omitidos += 1
+            continue
+
+        existente = Participante.query.filter_by(evento_id=evento_id, dni=dni).first()
+        if existente:
+            errores.append({"fila": idx + 1, "mensaje": f"DNI {dni} ya existe"})
+            omitidos += 1
+            continue
+
+        nuevo = Participante(
+            evento_id=evento_id,
+            nombre=nombre,
+            dni=dni,
+            correo=p.get('correo', ''),
+            telefono=p.get('telefono', ''),
+            qr_code=str(uuid.uuid4())
+        )
+        db.session.add(nuevo)
+        importados += 1
+
+    db.session.commit()
+    return jsonify({
+        "importados": importados,
+        "omitidos": omitidos,
+        "errores": errores
+    }), 201
