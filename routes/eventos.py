@@ -84,6 +84,8 @@ def editar_evento(evento_id):
     e.direccion = data.get('direccion', e.direccion)
     e.aforo = data.get('aforo', e.aforo)
     e.estado = data.get('estado', e.estado)
+    e.latitud = data.get('latitud', e.latitud)
+    e.longitud = data.get('longitud', e.longitud)
     db.session.commit()
     return jsonify({"mensaje": "Evento actualizado"})
 
