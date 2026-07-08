@@ -23,7 +23,8 @@ def listar_eventos():
             "latitud": float(e.latitud),
             "longitud": float(e.longitud),
             "aforo": e.aforo,
-            "estado": e.estado
+            "estado": e.estado,
+            "imagen_url": e.imagen_url
         })
     return jsonify(resultado)
 
@@ -43,7 +44,8 @@ def crear_evento():
         longitud=data['longitud'],
         aforo=data.get('aforo', 0),
         qr_token=str(uuid.uuid4()),
-        estado='Borrador'
+        estado='Borrador',
+        imagen_url=data.get('imagen_url')
     )
     db.session.add(nuevo_evento)
     db.session.commit()
@@ -65,6 +67,7 @@ def detalle_evento(evento_id):
         "longitud": float(e.longitud),
         "aforo": e.aforo,
         "estado": e.estado,
+        "imagen_url": e.imagen_url,
         "cantidad_participantes": len(e.participantes),
         "cantidad_actividades_agenda": len(e.agenda_items)
     })
@@ -86,6 +89,8 @@ def editar_evento(evento_id):
     e.estado = data.get('estado', e.estado)
     e.latitud = data.get('latitud', e.latitud)
     e.longitud = data.get('longitud', e.longitud)
+    if 'imagen_url' in data:
+        e.imagen_url = data['imagen_url']
     db.session.commit()
     return jsonify({"mensaje": "Evento actualizado"})
 

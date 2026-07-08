@@ -25,6 +25,7 @@ class Evento(db.Model):
     aforo = db.Column(db.Integer, default=0)
     qr_token = db.Column(db.String(64), unique=True, nullable=True)
     estado = db.Column(db.String(20), default='Borrador')  # Borrador, Publicado, EnCurso, Finalizado, Cancelado
+    imagen_url = db.Column(db.Text, nullable=True)
 
     participantes = db.relationship('Participante', backref='evento', cascade='all, delete-orphan')
     agenda_items = db.relationship('AgendaItem', backref='evento', cascade='all, delete-orphan')
